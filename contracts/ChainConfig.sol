@@ -27,6 +27,8 @@ contract ChainConfig is InjectorContextHolder, IChainConfig {
 
     ConsensusParams private _consensusParams;
 
+    address[] private _freeGasAddressList;
+
     constructor(bytes memory constructorParams) InjectorContextHolder(constructorParams) {
     }
 
@@ -136,5 +138,35 @@ contract ChainConfig is InjectorContextHolder, IChainConfig {
         uint256 prevValue = _consensusParams.minStakingAmount;
         _consensusParams.minStakingAmount = newValue;
         emit MinStakingAmountChanged(prevValue, newValue);
+    }
+
+    function addFreeGasAddress(address freeGasAddress) external onlyFromGovernance {
+        for (uint256 i = 0; i < _freeGasAddressList.length; i++) {
+            if (_freeGasAddressList[i] == freeGasAddress) {
+                return;
+            }
+        }
+        _freeGasAddressList.push(freeGasAddress);
+    }
+
+    function removeFreeGasAddress(address freeGasAddress) external onlyFromGovernance {
+        // find index of freeGasAddress
+        int256 indexOf = - 1;
+        for (uint256 i = 0; i < _freeGasAddressList.length; i++) {
+            if (_freeGasAddressList[i] != freeGasAddress) continue;
+            indexOf = int256(i);
+            break;
+        }
+        // remove freeGasAddress
+        if (indexOf >= 0) {
+            if (_freeGasAddressList.length > 1 && uint256(indexOf) != _freeGasAddressList.length - 1) {
+                _freeGasAddressList[uint256(indexOf)] = _freeGasAddressList[_freeGasAddressList.length - 1];
+            }
+            _freeGasAddressList.pop();
+        }
+    }
+
+    function getFreeGasAddress() public view returns (address[] memory) {
+        return _freeGasAddressList;
     }
 }
