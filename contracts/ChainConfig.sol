@@ -11,6 +11,7 @@ contract ChainConfig is InjectorContextHolder, IChainConfig {
     event FelonyThresholdChanged(uint32 prevValue, uint32 newValue);
     event ValidatorJailEpochLengthChanged(uint32 prevValue, uint32 newValue);
     event UndelegatePeriodChanged(uint32 prevValue, uint32 newValue);
+    event BurnRatioChanged(uint32 prevValue, uint32 newValue);
     event MinValidatorStakeAmountChanged(uint256 prevValue, uint256 newValue);
     event MinStakingAmountChanged(uint256 prevValue, uint256 newValue);
 
@@ -21,9 +22,13 @@ contract ChainConfig is InjectorContextHolder, IChainConfig {
         uint32 felonyThreshold;
         uint32 validatorJailEpochLength;
         uint32 undelegatePeriod;
+        uint32 burnRatio;
         uint256 minValidatorStakeAmount;
         uint256 minStakingAmount;
     }
+
+    uint256 public constant BURN_RATIO_SCALE = 10000;
+    address public constant BURN_ADDRESS = 0x000000000000000000000000000000000000dEaD;
 
     ConsensusParams private _consensusParams;
 
@@ -37,6 +42,7 @@ contract ChainConfig is InjectorContextHolder, IChainConfig {
         uint32 felonyThreshold,
         uint32 validatorJailEpochLength,
         uint32 undelegatePeriod,
+        uint32 burnRatio,
         uint256 minValidatorStakeAmount,
         uint256 minStakingAmount
     ) external whenNotInitialized {
@@ -52,6 +58,8 @@ contract ChainConfig is InjectorContextHolder, IChainConfig {
         emit ValidatorJailEpochLengthChanged(0, validatorJailEpochLength);
         _consensusParams.undelegatePeriod = undelegatePeriod;
         emit UndelegatePeriodChanged(0, undelegatePeriod);
+        _consensusParams.burnRatio = burnRatio;
+        emit BurnRatioChanged(0, burnRatio);
         _consensusParams.minValidatorStakeAmount = minValidatorStakeAmount;
         emit MinValidatorStakeAmountChanged(0, minValidatorStakeAmount);
         _consensusParams.minStakingAmount = minStakingAmount;
@@ -116,6 +124,25 @@ contract ChainConfig is InjectorContextHolder, IChainConfig {
         uint32 prevValue = _consensusParams.undelegatePeriod;
         _consensusParams.undelegatePeriod = newValue;
         emit UndelegatePeriodChanged(prevValue, newValue);
+    }
+
+    function getBurnRatio() external view override returns (uint32) {
+        return _consensusParams.burnRatio;
+    }
+
+    // TODO(seven): add check newValue.
+    function setBurnRatio(uint32 newValue) external override onlyFromGovernance {
+        uint32 prevValue = _consensusParams.burnRatio;
+        _consensusParams.burnRatio = newValue;
+        emit BurnRatioChanged(prevValue, newValue);
+    }
+
+    function getBurnRatioScale() external pure returns (uint256) {
+        return BURN_RATIO_SCALE;
+    }
+
+    function getBurnAddress() external pure returns (address) {
+        return BURN_ADDRESS;
     }
 
     function getMinValidatorStakeAmount() external view returns (uint256) {

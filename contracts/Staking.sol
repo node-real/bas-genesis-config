@@ -63,6 +63,9 @@ contract Staking is IStaking, InjectorContextHolder {
     event Claimed(address indexed validator, address indexed staker, uint256 amount, uint64 epoch);
     event Redelegated(address indexed validator, address indexed staker, uint256 amount, uint256 dust, uint64 epoch);
 
+    // burn events
+    event FeeBurned(uint256 amount);
+
     enum ValidatorStatus {
         NotFound,
         Active,
@@ -678,12 +681,26 @@ contract Staking is IStaking, InjectorContextHolder {
 
     function _depositFee(address validatorAddress) internal {
         require(msg.value > 0, "Staking: deposit is zero");
+
+        uint256 value = msg.value;
+        uint256 curBurnRatio = _chainConfigContract.getBurnRatio();
+
+        if (value > 0 && curBurnRatio > 0) {
+            uint256 toBurn = value * curBurnRatio / _chainConfigContract.getBurnRatioScale();
+            if (toBurn > 0) {
+                payable(address(_chainConfigContract.getBurnAddress())).transfer(toBurn);
+                emit FeeBurned(toBurn);
+
+                value = value - toBurn;
+            }
+        }
+
         // make sure validator is active
         Validator memory validator = _validatorsMap[validatorAddress];
         require(validator.status != ValidatorStatus.NotFound, "Staking: validator not found");
         // increase total pending rewards for validator for current epoch
         ValidatorSnapshot storage currentSnapshot = _touchValidatorSnapshot(validator, _currentEpoch());
-        currentSnapshot.totalRewards += uint96(msg.value);
+        currentSnapshot.totalRewards += uint96(value);
     }
 
     function getValidatorFee(address validatorAddress) external override view returns (uint256) {
