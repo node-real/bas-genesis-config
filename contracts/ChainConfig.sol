@@ -13,6 +13,8 @@ contract ChainConfig is InjectorContextHolder, IChainConfig {
     event UndelegatePeriodChanged(uint32 prevValue, uint32 newValue);
     event MinValidatorStakeAmountChanged(uint256 prevValue, uint256 newValue);
     event MinStakingAmountChanged(uint256 prevValue, uint256 newValue);
+    event FreeGasToAddressAdded(address freeGasToAddress);
+    event FreeGasToAddressRemoved(address freeGasToAddress);
 
     struct ConsensusParams {
         uint32 activeValidatorsLength;
@@ -27,7 +29,7 @@ contract ChainConfig is InjectorContextHolder, IChainConfig {
 
     ConsensusParams private _consensusParams;
 
-    address[] private _freeGasAddressList;
+    address[] private _freeGasToAddressList;
 
     constructor(bytes memory constructorParams) InjectorContextHolder(constructorParams) {
     }
@@ -140,33 +142,35 @@ contract ChainConfig is InjectorContextHolder, IChainConfig {
         emit MinStakingAmountChanged(prevValue, newValue);
     }
 
-    function addFreeGasAddress(address freeGasAddress) external onlyFromGovernance {
-        for (uint256 i = 0; i < _freeGasAddressList.length; i++) {
-            if (_freeGasAddressList[i] == freeGasAddress) {
-                return;
+    function addFreeGasToAddress(address freeGasToAddress) external override onlyFromGovernance {
+        for (uint256 i = 0; i < _freeGasToAddressList.length; i++) {
+            if (_freeGasToAddressList[i] == freeGasToAddress) {
+                revert("The address is existed!");
             }
         }
-        _freeGasAddressList.push(freeGasAddress);
+        _freeGasToAddressList.push(freeGasToAddress);
+        emit FreeGasToAddressAdded(freeGasToAddress);
     }
 
-    function removeFreeGasAddress(address freeGasAddress) external onlyFromGovernance {
+    function removeFreeGasToAddress(address freeGasToAddress) external override onlyFromGovernance {
         // find index of freeGasAddress
         int256 indexOf = - 1;
-        for (uint256 i = 0; i < _freeGasAddressList.length; i++) {
-            if (_freeGasAddressList[i] != freeGasAddress) continue;
+        for (uint256 i = 0; i < _freeGasToAddressList.length; i++) {
+            if (_freeGasToAddressList[i] != freeGasToAddress) continue;
             indexOf = int256(i);
             break;
         }
         // remove freeGasAddress
         if (indexOf >= 0) {
-            if (_freeGasAddressList.length > 1 && uint256(indexOf) != _freeGasAddressList.length - 1) {
-                _freeGasAddressList[uint256(indexOf)] = _freeGasAddressList[_freeGasAddressList.length - 1];
+            if (_freeGasToAddressList.length > 1 && uint256(indexOf) != _freeGasToAddressList.length - 1) {
+                _freeGasToAddressList[uint256(indexOf)] = _freeGasToAddressList[_freeGasToAddressList.length - 1];
             }
-            _freeGasAddressList.pop();
+            _freeGasToAddressList.pop();
         }
+        emit FreeGasToAddressRemoved(freeGasToAddress);
     }
 
-    function getFreeGasAddress() public view returns (address[] memory) {
-        return _freeGasAddressList;
+    function getFreeGasToAddressList() external view returns (address[] memory) {
+        return _freeGasToAddressList;
     }
 }
