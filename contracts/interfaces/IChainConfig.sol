@@ -34,4 +34,10 @@ interface IChainConfig {
     function getMinStakingAmount() external view returns (uint256);
 
     function setMinStakingAmount(uint256 newValue) external;
+
+    function addFreeGasToAddress(address freeGasToAddress) external;
+
+    function removeFreeGasToAddress(address freeGasToAddress) external;
+
+    function getFreeGasToAddressList() external view returns (address[] memory);
 }

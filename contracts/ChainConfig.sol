@@ -13,6 +13,8 @@ contract ChainConfig is InjectorContextHolder, IChainConfig {
     event UndelegatePeriodChanged(uint32 prevValue, uint32 newValue);
     event MinValidatorStakeAmountChanged(uint256 prevValue, uint256 newValue);
     event MinStakingAmountChanged(uint256 prevValue, uint256 newValue);
+    event FreeGasToAddressAdded(address freeGasToAddress);
+    event FreeGasToAddressRemoved(address freeGasToAddress);
 
     struct ConsensusParams {
         uint32 activeValidatorsLength;
@@ -26,6 +28,8 @@ contract ChainConfig is InjectorContextHolder, IChainConfig {
     }
 
     ConsensusParams private _consensusParams;
+
+    address[] private _freeGasToAddressList;
 
     constructor(bytes memory constructorParams) InjectorContextHolder(constructorParams) {
     }
@@ -136,5 +140,37 @@ contract ChainConfig is InjectorContextHolder, IChainConfig {
         uint256 prevValue = _consensusParams.minStakingAmount;
         _consensusParams.minStakingAmount = newValue;
         emit MinStakingAmountChanged(prevValue, newValue);
+    }
+
+    function addFreeGasToAddress(address freeGasToAddress) external override onlyFromGovernance {
+        for (uint256 i = 0; i < _freeGasToAddressList.length; i++) {
+            if (_freeGasToAddressList[i] == freeGasToAddress) {
+                revert("The address is existed!");
+            }
+        }
+        _freeGasToAddressList.push(freeGasToAddress);
+        emit FreeGasToAddressAdded(freeGasToAddress);
+    }
+
+    function removeFreeGasToAddress(address freeGasToAddress) external override onlyFromGovernance {
+        // find index of freeGasAddress
+        int256 indexOf = - 1;
+        for (uint256 i = 0; i < _freeGasToAddressList.length; i++) {
+            if (_freeGasToAddressList[i] != freeGasToAddress) continue;
+            indexOf = int256(i);
+            break;
+        }
+        // remove freeGasAddress
+        if (indexOf >= 0) {
+            if (_freeGasToAddressList.length > 1 && uint256(indexOf) != _freeGasToAddressList.length - 1) {
+                _freeGasToAddressList[uint256(indexOf)] = _freeGasToAddressList[_freeGasToAddressList.length - 1];
+            }
+            _freeGasToAddressList.pop();
+        }
+        emit FreeGasToAddressRemoved(freeGasToAddress);
+    }
+
+    function getFreeGasToAddressList() external view returns (address[] memory) {
+        return _freeGasToAddressList;
     }
 }
