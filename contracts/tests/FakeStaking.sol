@@ -8,8 +8,8 @@ contract FakeStaking is Staking {
     constructor(bytes memory ctor) Staking(ctor) {
     }
 
-    function addValidator(address account) external override {
-        _addValidator(account, account, ValidatorStatus.Active, 0, 0, _nextEpoch());
+    function addValidator(address account, address owner) external override {
+        _addValidator(account, owner, ValidatorStatus.Active, 0, 0, _nextEpoch());
     }
 
     function removeValidator(address account) external override {

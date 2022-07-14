@@ -120,11 +120,12 @@ contract Staking is IStaking, InjectorContextHolder {
     constructor(bytes memory constructorParams) InjectorContextHolder(constructorParams) {
     }
 
-    function ctor(address[] calldata validators, uint256[] calldata initialStakes, uint16 commissionRate) external whenNotInitialized {
+    function ctor(address[] calldata validators, address[] calldata validatorOwners, uint256[] calldata initialStakes, uint16 commissionRate) external whenNotInitialized {
         require(initialStakes.length == validators.length);
+        require(initialStakes.length == validatorOwners.length);
         uint256 totalStakes = 0;
         for (uint256 i = 0; i < validators.length; i++) {
-            _addValidator(validators[i], validators[i], ValidatorStatus.Active, commissionRate, initialStakes[i], 0);
+            _addValidator(validators[i], validatorOwners[i], ValidatorStatus.Active, commissionRate, initialStakes[i], 0);
             totalStakes += initialStakes[i];
         }
         require(address(this).balance == totalStakes, "Staking: initial stake balance mismatch");
@@ -508,8 +509,8 @@ contract Staking is IStaking, InjectorContextHolder {
         _addValidator(validatorAddress, msg.sender, ValidatorStatus.Pending, commissionRate, initialStake, _nextEpoch());
     }
 
-    function addValidator(address account) external onlyFromGovernance virtual override {
-        _addValidator(account, account, ValidatorStatus.Active, 0, 0, _nextEpoch());
+    function addValidator(address account, address owner) external onlyFromGovernance virtual override {
+        _addValidator(account, owner, ValidatorStatus.Active, 0, 0, _nextEpoch());
     }
 
     function _addValidator(address validatorAddress, address validatorOwner, ValidatorStatus status, uint16 commissionRate, uint256 initialStake, uint64 sinceEpoch) internal {

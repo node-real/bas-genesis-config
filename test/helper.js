@@ -77,8 +77,8 @@ const newContractUsingTypes = async (owner, params, types = {}) => {
   } = Object.assign({}, DEFAULT_MOCK_PARAMS, params)
   // factory contracts
   const staking = await Staking.new(createConstructorArgs(
-    ['address[]', 'uint256[]', 'uint16'],
-    [genesisValidators, genesisValidators.map(() => '0'), '0'])
+    ['address[]', 'address[]', 'uint256[]', 'uint16'],
+    [genesisValidators, genesisValidators, genesisValidators.map(() => '0'), '0'])
   );
   const slashingIndicator = await SlashingIndicator.new(createConstructorArgs([], []));
   if (typeof systemTreasury === 'string') {
