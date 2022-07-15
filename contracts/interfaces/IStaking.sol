@@ -41,7 +41,7 @@ interface IStaking is IValidatorSet {
 
     function registerValidator(address validator, uint16 commissionRate) payable external;
 
-    function addValidator(address validator) external;
+    function addValidator(address validator, address owner) external;
 
     function removeValidator(address validator) external;
 

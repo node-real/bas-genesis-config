@@ -196,6 +196,7 @@ type genesisConfig struct {
 	ChainId         int64                     `json:"chainId"`
 	Deployers       []common.Address          `json:"deployers"`
 	Validators      []common.Address          `json:"validators"`
+	ValidatorOwners []common.Address          `json:"validatorOwners"`
 	SystemTreasury  map[common.Address]uint16 `json:"systemTreasury"`
 	ConsensusParams consensusParams           `json:"consensusParams"`
 	VotingPeriod    int64                     `json:"votingPeriod"`
@@ -244,8 +245,9 @@ func createGenesisConfig(config genesisConfig, targetFile string) error {
 		initialStakeTotal.Add(initialStakeTotal, initialStake)
 	}
 	silent := targetFile == "stdout"
-	invokeConstructorOrPanic(genesis, stakingAddress, stakingRawArtifact, []string{"address[]", "uint256[]", "uint16"}, []interface{}{
+	invokeConstructorOrPanic(genesis, stakingAddress, stakingRawArtifact, []string{"address[]", "address[]", "uint256[]", "uint16"}, []interface{}{
 		config.Validators,
+		config.ValidatorOwners,
 		initialStakes,
 		uint16(config.CommissionRate),
 	}, silent, initialStakeTotal)
@@ -358,6 +360,9 @@ var localNetConfig = genesisConfig{
 	Validators: []common.Address{
 		common.HexToAddress("0x00a601f45688dba8a070722073b015277cf36725"),
 	},
+	ValidatorOwners: []common.Address{
+		common.HexToAddress("0x00a601f45688dba8a070722073b015277cf36725"),
+	},
 	SystemTreasury: map[common.Address]uint16{
 		common.HexToAddress("0x00a601f45688dba8a070722073b015277cf36725"): 10000,
 	},
@@ -390,6 +395,13 @@ var devNetConfig = genesisConfig{
 	Deployers: []common.Address{},
 	// list of default validators (it won't generate event log)
 	Validators: []common.Address{
+		common.HexToAddress("0x08fae3885e299c24ff9841478eb946f41023ac69"),
+		common.HexToAddress("0x751aaca849b09a3e347bbfe125cf18423cc24b40"),
+		common.HexToAddress("0xa6ff33e3250cc765052ac9d7f7dfebda183c4b9b"),
+		common.HexToAddress("0x49c0f7c8c11a4c80dc6449efe1010bb166818da8"),
+		common.HexToAddress("0x8e1ea6eaa09c3b40f4a51fcd056a031870a0549a"),
+	},
+	ValidatorOwners: []common.Address{
 		common.HexToAddress("0x08fae3885e299c24ff9841478eb946f41023ac69"),
 		common.HexToAddress("0x751aaca849b09a3e347bbfe125cf18423cc24b40"),
 		common.HexToAddress("0xa6ff33e3250cc765052ac9d7f7dfebda183c4b9b"),
