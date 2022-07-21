@@ -87,8 +87,8 @@ const newContractUsingTypes = async (owner, params, types = {}) => {
   const systemReward = await SystemReward.new(createConstructorArgs(['address[]', 'uint16[]'], [Object.keys(systemTreasury), Object.values(systemTreasury)]));
   const governance = await Governance.new(createConstructorArgs(['uint256'], [votingPeriod]));
   const chainConfig = await ChainConfig.new(createConstructorArgs(
-    ["uint32", "uint32", "uint32", "uint32", "uint32", "uint32", "uint32", "uint256", "uint256"],
-    [activeValidatorsLength, epochBlockInterval, misdemeanorThreshold, felonyThreshold, validatorJailEpochLength, undelegatePeriod, 0, minValidatorStakeAmount, minStakingAmount])
+    ["uint32", "uint32", "uint32", "uint32", "uint32", "uint32", "uint256", "uint256"],
+    [activeValidatorsLength, epochBlockInterval, misdemeanorThreshold, felonyThreshold, validatorJailEpochLength, undelegatePeriod, minValidatorStakeAmount, minStakingAmount])
   );
   const stakingPool = await StakingPool.new(createConstructorArgs([], []));
   const runtimeUpgrade = await RuntimeUpgrade.new(createConstructorArgs(['address'], [runtimeUpgradeEvmHook]));
