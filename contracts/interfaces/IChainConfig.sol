@@ -27,14 +27,6 @@ interface IChainConfig {
 
     function setUndelegatePeriod(uint32 newValue) external;
 
-    function getBurnRatio() external view returns (uint32);
-
-    function setBurnRatio(uint32 newValue) external;
-
-    function getBurnRatioScale() external view returns (uint256);
-
-    function getBurnAddress() external view returns (address);
-
     function getMinValidatorStakeAmount() external view returns (uint256);
 
     function setMinValidatorStakeAmount(uint256 newValue) external;
