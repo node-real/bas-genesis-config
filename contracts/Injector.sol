@@ -12,6 +12,8 @@ import "./interfaces/IRuntimeUpgrade.sol";
 import "./interfaces/IStakingPool.sol";
 import "./interfaces/IInjector.sol";
 import "./interfaces/IDeployerProxy.sol";
+import "./interfaces/IReward.sol";
+import "./interfaces/IReserve.sol";
 
 abstract contract AlreadyInit {
 
@@ -54,6 +56,10 @@ abstract contract InjectorContextHolder is AlreadyInit, IInjector {
     // already init (1) + ctor(1) + injector (8) = 10
     uint256[100 - 10] private __reserved;
 
+    // custom defined contracts
+    IReward internal _rewardContract;
+    IReserve internal _reserveContract;
+
     constructor(bytes memory constructorParams) {
         // save constructor params to use them in the init function
         _ctor = constructorParams;
@@ -70,6 +76,9 @@ abstract contract InjectorContextHolder is AlreadyInit, IInjector {
         _chainConfigContract = IChainConfig(0x0000000000000000000000000000000000007003);
         _runtimeUpgradeContract = IRuntimeUpgrade(0x0000000000000000000000000000000000007004);
         _deployerProxyContract = IDeployerProxy(0x0000000000000000000000000000000000007005);
+        // custom defined contracts
+        _rewardContract = IReward(0x0000000000000000000000000000000010000000);
+        _reserveContract = IReserve(0x0000000000000000000000000000000010000001);
         // invoke constructor
         _invokeContractConstructor();
     }
@@ -82,7 +91,9 @@ abstract contract InjectorContextHolder is AlreadyInit, IInjector {
         IGovernance governanceContract,
         IChainConfig chainConfigContract,
         IRuntimeUpgrade runtimeUpgradeContract,
-        IDeployerProxy deployerProxyContract
+        IDeployerProxy deployerProxyContract,
+        IReward rewardContract,
+        IReserve reserveContract
     ) public initializer {
         // BSC-compatible
         _stakingContract = stakingContract;
@@ -94,6 +105,9 @@ abstract contract InjectorContextHolder is AlreadyInit, IInjector {
         _chainConfigContract = chainConfigContract;
         _runtimeUpgradeContract = runtimeUpgradeContract;
         _deployerProxyContract = deployerProxyContract;
+        // custom defined
+        _rewardContract = rewardContract;
+        _reserveContract = reserveContract;
         // invoke constructor
         _invokeContractConstructor();
     }
@@ -140,6 +154,11 @@ abstract contract InjectorContextHolder is AlreadyInit, IInjector {
         _;
     }
 
+    modifier onlyFromReward() {
+        require(IReward(msg.sender) == _rewardContract, "InjectorContextHolder: only reward");
+        _;
+    }
+
     modifier onlyZeroGasPrice() {
         require(tx.gasprice == 0, "InjectorContextHolder: only zero gas price");
         _;
@@ -167,5 +186,13 @@ abstract contract InjectorContextHolder is AlreadyInit, IInjector {
 
     function getChainConfig() public view returns (IChainConfig) {
         return _chainConfigContract;
+    }
+
+    function getReward() public view returns (IReward) {
+        return _rewardContract;
+    }
+
+    function getReserve() public view returns (IReserve) {
+        return _reserveContract;
     }
 }

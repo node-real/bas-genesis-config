@@ -48,7 +48,7 @@ contract RuntimeUpgrade is InjectorContextHolder, IRuntimeUpgrade {
     }
 
     function getSystemContracts() public view override returns (address[] memory) {
-        address[] memory result = new address[](8 + _deployedSystemContracts.length);
+        address[] memory result = new address[](10 + _deployedSystemContracts.length);
         // BSC-compatible
         result[0] = address(_stakingContract);
         result[1] = address(_slashingIndicatorContract);
@@ -59,6 +59,8 @@ contract RuntimeUpgrade is InjectorContextHolder, IRuntimeUpgrade {
         result[5] = address(_chainConfigContract);
         result[6] = address(_runtimeUpgradeContract);
         result[7] = address(_deployerProxyContract);
+        result[8] = address(_rewardContract);
+        result[9] = address(_reserveContract);
         // copy deployed system smart contracts
         for (uint256 i = 0; i < _deployedSystemContracts.length; i++) {
             result[8 + i] = _deployedSystemContracts[i];

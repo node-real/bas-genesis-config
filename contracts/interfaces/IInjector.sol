@@ -8,6 +8,8 @@ import "./IStaking.sol";
 import "./IDeployerProxy.sol";
 import "./IStakingPool.sol";
 import "./IChainConfig.sol";
+import "./IReward.sol";
+import "./IReserve.sol";
 
 interface IInjector {
 
@@ -26,4 +28,8 @@ interface IInjector {
     function getGovernance() external view returns (IGovernance);
 
     function getChainConfig() external view returns (IChainConfig);
+
+    function getReward() external view returns (IReward);
+
+    function getReserve() external view returns (IReserve);
 }

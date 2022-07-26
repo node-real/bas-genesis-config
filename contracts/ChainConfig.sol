@@ -15,6 +15,7 @@ contract ChainConfig is InjectorContextHolder, IChainConfig {
     event MinStakingAmountChanged(uint256 prevValue, uint256 newValue);
     event FreeGasToAddressAdded(address freeGasToAddress);
     event FreeGasToAddressRemoved(address freeGasToAddress);
+    event EnableDelegateChanged(bool preValue, bool newValue);
 
     struct ConsensusParams {
         uint32 activeValidatorsLength;
@@ -30,6 +31,8 @@ contract ChainConfig is InjectorContextHolder, IChainConfig {
     ConsensusParams private _consensusParams;
 
     address[] private _freeGasToAddressList;
+
+    bool enableDelegate;
 
     constructor(bytes memory constructorParams) InjectorContextHolder(constructorParams) {
     }
@@ -172,5 +175,15 @@ contract ChainConfig is InjectorContextHolder, IChainConfig {
 
     function getFreeGasToAddressList() external view returns (address[] memory) {
         return _freeGasToAddressList;
+    }
+
+    function getEnableDelegate() external view returns (bool) {
+        return enableDelegate;
+    }
+
+    function setEnableDelegate(bool newValue) external override onlyFromGovernance {
+        bool prevValue = enableDelegate;
+        enableDelegate = newValue;
+        emit EnableDelegateChanged(prevValue, newValue);
     }
 }

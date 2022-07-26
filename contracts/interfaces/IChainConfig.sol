@@ -40,4 +40,8 @@ interface IChainConfig {
     function removeFreeGasToAddress(address freeGasToAddress) external;
 
     function getFreeGasToAddressList() external view returns (address[] memory);
+
+    function getEnableDelegate() external view returns (bool);
+
+    function setEnableDelegate(bool newValue) external;
 }

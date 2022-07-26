@@ -11,6 +11,8 @@ const Governance = artifacts.require("Governance");
 const StakingPool = artifacts.require("StakingPool");
 const RuntimeUpgrade = artifacts.require("RuntimeUpgrade");
 const DeployerProxy = artifacts.require("DeployerProxy");
+const Reward = artifacts.require("Reward");
+const Reserve = artifacts.require("Reserve");
 const FakeStaking = artifacts.require("FakeStaking");
 const FakeDeployerProxy = artifacts.require("FakeDeployerProxy");
 const FakeRuntimeUpgrade = artifacts.require("FakeRuntimeUpgrade");
@@ -18,6 +20,7 @@ const FakeSystemReward = artifacts.require("FakeSystemReward");
 
 const DEFAULT_MOCK_PARAMS = {
   systemTreasury: '0x0000000000000000000000000000000000000000',
+  rewardOwner: '0x0000000000000000000000000000000000000000',
   activeValidatorsLength: '3',
   epochBlockInterval: '10',
   misdemeanorThreshold: '50',
@@ -26,6 +29,7 @@ const DEFAULT_MOCK_PARAMS = {
   undelegatePeriod: '0',
   minValidatorStakeAmount: '1000000000000000000',
   minStakingAmount: '1000000000000000000',
+  reserveAmount: '100000000000000000000',
   genesisValidators: [],
   genesisDeployers: [],
   runtimeUpgradeEvmHook: '0x0000000000000000000000000000000000000000',
@@ -41,6 +45,8 @@ const DEFAULT_CONTRACT_TYPES = {
   StakingPool: StakingPool,
   RuntimeUpgrade: RuntimeUpgrade,
   DeployerProxy: DeployerProxy,
+  Reward: Reward,
+  Reserve: Reserve,
 };
 
 const createConstructorArgs = (types, args) => {
@@ -59,10 +65,13 @@ const newContractUsingTypes = async (owner, params, types = {}) => {
     StakingPool,
     RuntimeUpgrade,
     DeployerProxy,
+    Reward,
+    Reserve,
   } = Object.assign({}, DEFAULT_CONTRACT_TYPES, types)
   let {
     genesisDeployers,
     systemTreasury,
+    rewardOwner,
     activeValidatorsLength,
     epochBlockInterval,
     misdemeanorThreshold,
@@ -72,6 +81,7 @@ const newContractUsingTypes = async (owner, params, types = {}) => {
     undelegatePeriod,
     minValidatorStakeAmount,
     minStakingAmount,
+    reserveAmount,
     runtimeUpgradeEvmHook,
     votingPeriod,
   } = Object.assign({}, DEFAULT_MOCK_PARAMS, params)
@@ -93,8 +103,10 @@ const newContractUsingTypes = async (owner, params, types = {}) => {
   const stakingPool = await StakingPool.new(createConstructorArgs([], []));
   const runtimeUpgrade = await RuntimeUpgrade.new(createConstructorArgs(['address'], [runtimeUpgradeEvmHook]));
   const deployerProxy = await DeployerProxy.new(createConstructorArgs(['address[]'], [genesisDeployers]));
+  const reward = await Reward.new(createConstructorArgs(['address'], [rewardOwner]));
+  const reserve = await Reserve.new(createConstructorArgs([], []));
   // init them all
-  for (const contract of [slashingIndicator, staking, systemReward, stakingPool, governance, chainConfig, runtimeUpgrade, deployerProxy]) {
+  for (const contract of [slashingIndicator, staking, systemReward, stakingPool, governance, chainConfig, runtimeUpgrade, deployerProxy, reward, reserve]) {
     await contract.initManually(
       staking.address,
       slashingIndicator.address,
@@ -104,6 +116,8 @@ const newContractUsingTypes = async (owner, params, types = {}) => {
       chainConfig.address,
       runtimeUpgrade.address,
       deployerProxy.address,
+      reward.address,
+      reserve.address,
     );
   }
   return {
@@ -118,6 +132,8 @@ const newContractUsingTypes = async (owner, params, types = {}) => {
     runtimeUpgrade,
     deployer: deployerProxy,
     deployerProxy,
+    reward: reward,
+    reserve: reserve,
   }
 }
 
